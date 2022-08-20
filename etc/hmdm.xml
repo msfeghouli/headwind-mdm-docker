@@ -2,7 +2,7 @@
 <Context>
     <!-- database configurations -->
     <Parameter name="JDBC.driver"   value="org.postgresql.Driver"/>
-    <Parameter name="JDBC.url"      value="jdbc:postgresql://localhost:5432/hmdm"/>
+    <Parameter name="JDBC.url"      value="jdbc:postgresql://"pgdb:5432/hmdm"/>
     <Parameter name="JDBC.username" value="hmdm"/>
     <Parameter name="JDBC.password" value="topsecret"/>
 

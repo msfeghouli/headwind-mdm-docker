@@ -3,15 +3,16 @@
 # Start postgres
 catalina.sh start
 adb devices
-service postgresql restart
+#service postgresql restart
+PSQL_CONNSTRING="postgresql://$SQL_USER:$SQL_PASS@$SQL_HOST:$SQL_PORT/$SQL_BASE"
 
 # Create database if doesn't exist
 if [ $HMDM_SQL_USER != 'hmdm' ]; then
-    sudo -u postgres psql -c "CREATE USER $HMDM_SQL_USER WITH PASSWORD '$HMDM_SQL_PASS';"
+    psql $PSQL_CONNSTRING -c "CREATE USER $HMDM_SQL_USER WITH PASSWORD '$HMDM_SQL_PASS';"
 fi
 
-if [ $HMDM_SQL_BASE != 'hmdm' ]; then
-    sudo -u postgres psql -c "CREATE DATABASE $HMDM_SQL_BASE WITH OWNER=$HMDM_SQL_USER;"
+if [ $HMDM_SQL_BASE != devices'hmdm' ]; then
+    psql $PSQL_CONNSTRING -c "CREATE DATABASE $HMDM_SQL_BASE WITH OWNER=$HMDM_SQL_USER;"
 fi
 
 if [ ! -f '/usr/local/tomcat/conf/Catalina/localhost//hmdm.xml' ]; then
@@ -19,16 +20,9 @@ if [ ! -f '/usr/local/tomcat/conf/Catalina/localhost//hmdm.xml' ]; then
     ./hmdm_install.sh
 fi
 
-#change the russian text in the dashboard to english
-sudo -u postgres psql -d hmdm -c "UPDATE userroles SET name = 'Super Administrator', description = 'The all seeing eye of sauron' WHERE id = '1';" 
-sudo -u postgres psql -d hmdm -c "UPDATE userroles SET name = 'Administrator', description = 'Serves as the administrator for one customer record' WHERE id = '2';"
-sudo -u postgres psql -d hmdm -c "UPDATE userroles SET name = 'User', description = 'User for one customer record' WHERE id = '3';"
-sudo -u postgres psql -d hmdm -c "UPDATE userroles SET name = 'Observer', description = 'The observer is watching keenly' WHERE id = '100';"
-sudo -u postgres psql -d hmdm -c "UPDATE groups SET name = 'Default' WHERE id = '1';"
-sudo -u postgres psql -d hmdm -c "UPDATE configurations SET name = 'Default', description = 'Basic configuration for all devices' WHERE id = '1';"
+# Change the russian text in the dashboard to english
 
 catalina.sh stop
 sleep 30
 cd ..
 catalina.sh run
-

@@ -5,16 +5,16 @@
 #
 REPOSITORY_BASE=https://h-mdm.com/files
 CLIENT_VERSION=3.35
-DEFAULT_SQL_HOST=localhost
+DEFAULT_SQL_HOST=pgdb
 DEFAULT_SQL_PORT=5432
 DEFAULT_SQL_BASE=hmdm
 DEFAULT_SQL_USER=hmdm
-DEFAULT_SQL_PASS='topsecret'
+DEFAULT_SQL_PASS='hmdm'
 DEFAULT_LOCATION="/opt/hmdm"
 TOMCAT_HOME=$(ls -d /var/lib/tomcat* | tail -n1)
 TOMCAT_ENGINE="Catalina"
 TOMCAT_HOST="localhost"
-DEFAULT_PROTOCOL=http
+DEFAULT_PROTOCOL=hHMDM_SQL_PASSttp
 DEFAULT_BASE_DOMAIN="0.0.0.0"
 DEFAULT_BASE_PATH="/hmdm"
 DEFAULT_PORT="8080"
@@ -44,12 +44,12 @@ else
     SQL_BASE=$DEFAULT_SQL_BASE
 fi
 
-
 if [ ! -z "$HMDM_SQL_USER" ]; then
     SQL_USER=$HMDM_SQL_USER
 else
     SQL_USER=$DEFAULT_SQL_USER
 fi
+
 if [ ! -z "$HMDM_SQL_PASS" ]; then
     SQL_PASS=$HMDM_SQL_PASS
 else
@@ -205,7 +205,7 @@ fi
 TOMCAT_DEPLOY_PATH=$BASE_PATH
 if [ "$BASE_PATH" == "ROOT" ]; then
     BASE_PATH=""
-fi 
+fi
 
 if [[ ! -z "$HMDM_BASE_DOMAIN" ]]; then
     BASE_HOST="$HMDM_BASE_DOMAIN:$PORT"
@@ -242,7 +242,8 @@ cat ./install/context_template.xml | sed "s|_SQL_HOST_|$SQL_HOST|g; s|_SQL_PORT_
 if [ "$?" -ne 0 ]; then
     echo "Failed to create a Tomcat config file $TOMCAT_CONFIG_PATH/$TOMCAT_DEPLOY_PATH.xml!"
     exit 1
-fi 
+fi
+
 echo "Tomcat config file created: $TOMCAT_CONFIG_PATH/$TOMCAT_DEPLOY_PATH.xml"
 chmod 644 $TOMCAT_CONFIG_PATH/$TOMCAT_DEPLOY_PATH.xml
 
@@ -275,6 +276,11 @@ fi
 echo "Deployment successful, initializing the database..."
 
 # Initialize database
+psql $PSQL_CONNSTRING << EOF
+       <your sql queries go here>
+
+
+EOF
 cat ./install/sql/hmdm_init.$LANGUAGE.sql | sed "s|_HMDM_BASE_|$LOCATION|g; s|_HMDM_VERSION_|$CLIENT_VERSION|g; s|_HMDM_APK_|$CLIENT_APK|g" > $TEMP_SQL_FILE
 cat $TEMP_SQL_FILE | psql $PSQL_CONNSTRING > /dev/null 2>&1
 if [ "$?" -ne 0 ]; then
